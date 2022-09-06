@@ -1,3 +1,31 @@
+# Meme Museum
+
+## API
+
+```typescript
+// method: create_meme
+type CreateMemeInput {
+  title: string,
+	url: string,
+	museum_name: Sstring,
+}
+
+// method: get_meme
+type GetMemeInput {
+	id: number // u64
+}
+
+// method: get_meme
+type GetMemeListInput {
+	// No inputs
+}
+
+// method: donate_meme (payable)
+type DonateMeme {
+	id: number // u64
+}
+```
+
 ## Deploy contract
 
 Compile to wasm:
@@ -21,7 +49,7 @@ Add the contract to ENV to use easily:
 SC=dev-1660968562799-63169581314581
 ```
 
-# Call a method
+## Call a method
 
 ```
 near call $SC create_meme '{"title":"Never gonna give you up","museum_name":"Bellas Artes","url":"https://imagenes.20minutos.es/uploads/imagenes/2020/06/19/rick-astley-en-su-cancion-never-gonna-give-you-up.gif"}' --accountId kranfix.testnet
@@ -47,6 +75,6 @@ near view $SC get_meme_list ''
 near view $SC get_meme '{"id":0}'
 ```
 
-# Watch subaccount in the wallet
+## Watch subaccount in the wallet
 
 See this [answer in stackoverflow](https://stackoverflow.com/questions/71238889/how-to-import-an-account-into-the-near-wallet-using-only-the-private-key-no-see)
