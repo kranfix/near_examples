@@ -27,7 +27,7 @@ impl Default for SimpleMemeMuseum {
 
 #[near_bindgen]
 impl SimpleMemeMuseum {
-  pub fn create_meme(&mut self, title: String, url: String, museum_name: String) {
+  pub fn create_meme(&mut self, title: String, url: String, museum_name: String) -> Meme {
     let meme = Meme::new(title, museum_name.clone(), url);
 
     self.memes.insert(&meme.id, &meme);
@@ -44,9 +44,25 @@ impl SimpleMemeMuseum {
       )
       .as_bytes(),
     );
+    meme
+  }
+
+  #[result_serializer(borsh)]
+  pub fn create_meme_borsh(
+    &mut self,
+    #[serializer(borsh)] title: String,
+    #[serializer(borsh)] url: String,
+    #[serializer(borsh)] museum_name: String,
+  ) -> Meme {
+    self.create_meme(title, url, museum_name)
   }
 
   pub fn get_meme(&self, id: u64) -> Option<Meme> {
+    self.memes.get(&id)
+  }
+
+  #[result_serializer(borsh)]
+  pub fn get_meme_borsh(&self, #[serializer(borsh)] id: u64) -> Option<Meme> {
     self.memes.get(&id)
   }
 
@@ -54,7 +70,16 @@ impl SimpleMemeMuseum {
     self.memes.iter().collect()
   }
 
+  #[result_serializer(borsh)]
+  pub fn get_meme_list_borsh(&self) -> Vec<(u64, Meme)> {
+    self.memes.iter().collect()
+  }
+
   pub fn get_museum_list(&self) -> Vec<String> {
+    self.museums.keys().collect()
+  }
+
+  pub fn get_museum_list_borsh(&self) -> Vec<String> {
     self.museums.keys().collect()
   }
 
@@ -68,6 +93,14 @@ impl SimpleMemeMuseum {
       .iter()
       .filter_map(|id| self.memes.get(id))
       .collect()
+  }
+
+  #[result_serializer(borsh)]
+  pub fn get_meme_list_by_museum_borsh(
+    &self,
+    #[serializer(borsh)] museum_name: String,
+  ) -> Vec<Meme> {
+    self.get_meme_list_by_museum(museum_name)
   }
 
   #[payable]
@@ -86,6 +119,22 @@ impl SimpleMemeMuseum {
     meme.donations += amount;
     self.memes.insert(&id, &meme);
     Promise::new(meme.created_by.clone()).transfer(amount);
+    true
+  }
+
+  // delete a museum and its memes
+  pub fn delete_museum(&mut self, museum_name: String) -> bool {
+    let memes = match self.museums.get(&museum_name) {
+      Some(memes) => memes,
+      None => {
+        env::log(format!("Musemum {} not found", museum_name).as_bytes());
+        return false;
+      }
+    };
+    for meme in memes {
+      self.memes.remove(&meme);
+    }
+    self.museums.remove(&museum_name);
     true
   }
 }
