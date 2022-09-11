@@ -127,7 +127,7 @@ impl SimpleMemeMuseum {
     let memes = match self.museums.get(&museum_name) {
       Some(memes) => memes,
       None => {
-        env::log(format!("Musemum {} not found", museum_name).as_bytes());
+        env::log(format!("Museum {} not found", museum_name).as_bytes());
         return false;
       }
     };
