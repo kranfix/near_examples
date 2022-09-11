@@ -18,9 +18,9 @@ pub struct Meme {
 impl Default for Meme {
   fn default() -> Self {
     Self {
-      id: env::block_index(),
+      id: env::block_height(),
       title: "".to_string(),
-      created_by: env::signer_account_id(),
+      created_by: env::signer_account_id().to_string(),
       museum: "".to_string(),
       url: "".to_string(),
       donations: 0,
@@ -31,9 +31,9 @@ impl Default for Meme {
 impl Meme {
   pub fn new(title: String, museum: String, url: String) -> Self {
     Self {
-      id: env::block_index(),
+      id: env::block_height(),
       title,
-      created_by: env::signer_account_id(),
+      created_by: env::signer_account_id().to_string(),
       museum,
       url,
       donations: 0,

@@ -4,10 +4,8 @@ use meme::Meme;
 use near_sdk::{
   borsh::{self, BorshDeserialize, BorshSerialize},
   collections::UnorderedMap,
-  env, near_bindgen, setup_alloc, Promise,
+  env, near_bindgen, AccountId, Promise,
 };
-
-setup_alloc!();
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
@@ -37,12 +35,12 @@ impl SimpleMemeMuseum {
     m.push(meme.id);
     self.museums.insert(&museum_name, &m);
 
-    env::log(
+    env::log_str(
       format!(
         "Meme {} created by {} in {} museum",
         meme.id, meme.created_by, museum_name
       )
-      .as_bytes(),
+      .as_str(),
     );
     meme
   }
@@ -118,7 +116,8 @@ impl SimpleMemeMuseum {
     let amount = env::attached_deposit();
     meme.donations += amount;
     self.memes.insert(&id, &meme);
-    Promise::new(meme.created_by.clone()).transfer(amount);
+
+    Promise::new(AccountId::new_unchecked(meme.created_by.to_owned())).transfer(amount);
     true
   }
 
@@ -127,7 +126,7 @@ impl SimpleMemeMuseum {
     let memes = match self.museums.get(&museum_name) {
       Some(memes) => memes,
       None => {
-        env::log(format!("Museum {} not found", museum_name).as_bytes());
+        env::log_str(format!("Museum {} not found", museum_name).as_str());
         return false;
       }
     };
