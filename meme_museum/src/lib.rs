@@ -136,4 +136,40 @@ impl SimpleMemeMuseum {
     self.museums.remove(&museum_name);
     true
   }
+
+  pub fn delete_user_memes(&mut self) -> bool {
+    let user_address = env::signer_account_id().to_string();
+
+    let user_memes: Vec<(u64, String)> = self
+      .memes
+      .values()
+      .filter(|m| m.created_by.eq(&user_address))
+      .map(|m| (m.id, m.museum))
+      .collect();
+
+    if user_memes.is_empty() {
+      return false;
+    }
+
+    for (meme_id, museum) in user_memes {
+      self.delete_meme_from_museum(museum, meme_id);
+    }
+
+    true
+  }
+}
+
+impl SimpleMemeMuseum {
+  fn delete_meme_from_museum(&mut self, museum: String, meme_id: u64) -> bool {
+    let mut memes = match self.museums.get(&museum) {
+      Some(memes) => memes,
+      None => return false,
+    };
+    memes.retain(|meme| *meme != meme_id);
+
+    if memes.is_empty() {
+      self.museums.remove(&museum);
+    }
+    true
+  }
 }
